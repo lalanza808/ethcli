@@ -28,14 +28,22 @@ def generate_seed():
     m = generate_mnemonic()
     click.echo(m)
 
-def get_eth_account(account_index, mnemonic_seed:str):
+@cli.command('create_wallet')
+def create_wallet():
+    m = generate_mnemonic()
+    k = get_eth_account(m, 0, 0)
+    click.echo(f'Mnemonic: {m}')
+    click.echo(f'Privkey: {k[1]}')
+    click.echo(f'Pubkey: {k[0]}')
+
+def get_eth_account(mnemonic_seed:str, address_index:int=0, account_index:int=0):
     bip44_hdwallet = BIP44HDWallet(cryptocurrency=EthereumMainnet)
     bip44_hdwallet.from_mnemonic(
         mnemonic=mnemonic_seed, language="english", passphrase=None
     )
     bip44_hdwallet.clean_derivation()
     bip44_derivation = BIP44Derivation(
-        cryptocurrency=EthereumMainnet, account=0, change=False, address=account_index
+        cryptocurrency=EthereumMainnet, account=account_index, change=False, address=address_index
     )
     bip44_hdwallet.from_path(path=bip44_derivation)
     public_address = bip44_hdwallet.address()
@@ -45,3 +53,8 @@ def get_eth_account(account_index, mnemonic_seed:str):
 
 if __name__ == '__main__':
     cli()
+
+
+# connect to ETH provider
+# generate list of N addresses stemming from a root private key
+# sign and send transactions to network across N addresses
